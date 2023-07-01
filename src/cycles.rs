@@ -7,7 +7,23 @@ use std::{
     time::Duration,
 };
 
-#[derive(Clone, Copy, PartialEq, Add, Sub, From, Into, Mul, Div, Sum, Constructor, Debug)]
+#[derive(
+    Clone,
+    Copy,
+    PartialEq,
+    Add,
+    Sub,
+    From,
+    Into,
+    Mul,
+    Div,
+    Sum,
+    Constructor,
+    Debug,
+    PartialOrd,
+    Eq,
+    Ord,
+)]
 pub struct Cycles {
     raw: c_ll,
 }
@@ -141,7 +157,7 @@ impl Cycles {
         Ok(hz as f64 / cur_hz as f64)
     }
 
-    /// 类似[`self::as_usage`]，但是返回和当前的频率的差值[`self::Cycles`]
+    /// 类似as_usage，但是返回和当前的频率的差值[`self::Cycles`]
     /// 同样的理由，diff可能会是负数
     /// d: 记录cycles的时间
     /// c: cpu核心编号

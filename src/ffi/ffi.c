@@ -39,7 +39,6 @@ struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus)
     if (reader->cpus == NULL)
     {
         free(reader);
-        printf("malloc\n");
         return NULL;
     }
     reader->size = numCpus;
@@ -55,7 +54,6 @@ struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus)
             }
             free(reader->cpus);
             free(reader);
-            printf("others%zu\n", i);
             return NULL;
         }
         reader->cpus[i] = fd;
