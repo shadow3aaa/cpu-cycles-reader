@@ -1,6 +1,6 @@
 [package]
 name = "cpu_cycles_reader"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 author = "shadow3"
 description = "为读取CpuCycles特化的perf_event_read封装"
@@ -9,6 +9,7 @@ license = "WTFPL"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+derive_more = "0.99.17"
 libc = "0.2.147"
 
 [build-dependencies]

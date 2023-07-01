@@ -7,7 +7,6 @@ fn main() {
 
     // 产生链接库
     let out_dir = env::var("OUT_DIR").unwrap();
-    // let _lib_path = Path::new(&out_dir).join("libffi.a");
     cc::Build::new().file(ffi_c_path).compile("ffi");
 
     println!("cargo:rustc-link-search=native={}", out_dir);
