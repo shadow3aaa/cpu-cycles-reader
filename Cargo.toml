@@ -2,6 +2,8 @@
 name = "cpu_cycles_reader"
 version = "0.1.0"
 edition = "2021"
+author = "shadow3"
+description = "为读取CpuCycles特化的perf_event_read封装"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
