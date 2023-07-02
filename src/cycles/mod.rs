@@ -1,4 +1,4 @@
-//! Cycles提供了一种表示周期数的方式
+//! Cycles provides a way to represent the number of cycles
 
 mod ext;
 mod trans;

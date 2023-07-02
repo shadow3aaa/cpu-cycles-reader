@@ -19,7 +19,7 @@ impl Cycles {
     /// let now = Instant::now();
     /// let cycles_former = Cycles::from_ghz(1);
     ///
-    /// // cpu进行了一些操作，假设我们记录的是cpu7
+    /// // The cpu has performed some operations, assuming we are recording cpu7
     ///
     /// let dur = Instant::now() - now;
     /// let cycles_later = Cycles::from_ghz(2);

@@ -90,7 +90,7 @@ impl CyclesReader {
 
     /// Read the number of Cycles from start to present
     /// Return in the order of the cpu parameters of the constructor
-    pub fn read(&self) ->Result<HashMap<c_int, Cycles>, &'static str> {
+    pub fn read(&self) -> Result<HashMap<c_int, Cycles>, &'static str> {
         let raw = unsafe { ffi::readCyclesReader(self.raw_ptr) };
 
         if raw.is_null() {
