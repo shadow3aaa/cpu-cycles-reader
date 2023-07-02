@@ -1,30 +1,34 @@
 //! Only for reading CpuCycles specialization, not a complete package of [perf_event_read](https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html)
+//!
 //! ⚠ Permission requirements: Make sure the program has root permissions
 //!
 //! Example:
 //! ```ignore
 //! use std::time::{Duration, Instant};
 //! use cpu_cycles_reader::{Cycles, CyclesReader};
-//! let reader = CyclesReader::new(&[7]).unwrap();
+//!
+//! let reader = CyclesReader::new(&[0, 1, 2, 3, 4, 5, 6, 7]).unwrap();
 //! reader.enable();
 //!
 //! let now = Instant::now();
 //! let cycles_former = reader.read().unwrap();
-//! let cycles_former = cycles_former.get(&7).unwrap();
+//! let cycles_former = cycles_former.get(&7).unwrap(); // get cycles
 //!
-//! // The cpu has performed some operations, we record cpu7
+//! // The cpu has performed some operations, here we record cpu7
 //!
 //! let dur = Instant::now() - now;
 //! let cycles_later = reader.read().unwrap();
-//! let cycles_later = cycles_later.get(&7).unwrap();
+//! let cycles_later = cycles_later.get(&7).unwrap(); // get cycles
 //!
-//! let cycles = *cycles_later - *cycles_former;
+//! let cycles = *cycles_later - *cycles_former; // Calculate difference
+//! // NOTE: There is no need to calculate the difference as a value within 1 second, there is such logic inside Cycles::as_usage() or Cycles::as_diff()
+//!
 //! let usage = cycles.as_usage(dur, 7).unwrap();
 //! println!("{:.2}", usage);
 //! ```
 
 mod cycles;
-mod ffi;
+pub mod ffi;
 
 use std::{collections::HashMap, ptr, slice};
 
@@ -49,6 +53,7 @@ impl CyclesReader {
     /// Create CyclesReader
     /// ```ignore
     /// use cpu_cycles_reader::CyclesReader;
+    ///
     /// let reader = CyclesReader::new(&[0, 1, 2, 3]).unwrap();
     /// ```
     pub fn new(cpus: &[c_int]) -> Result<Self, &'static str> {
@@ -89,7 +94,8 @@ impl CyclesReader {
     }
 
     /// Read the number of Cycles from start to present
-    /// Return in the order of the cpu parameters of the constructor
+    ///
+    /// According to the CPU number, it is collected as a [`std::collections::HashMap`], which is convenient for on-demand reading
     pub fn read(&self) -> Result<HashMap<c_int, Cycles>, &'static str> {
         let raw = unsafe { ffi::readCyclesReader(self.raw_ptr) };
 

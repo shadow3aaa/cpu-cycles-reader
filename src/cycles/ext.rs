@@ -8,24 +8,28 @@ use super::Cycles;
 
 impl Cycles {
     /// Returns the average number of cpu usage within a specified time
+    ///
     /// May be >100%, because the current frequency read is only a suggested frequency, not a real frequency, but the cycles are real
+    ///
     /// d: record the time of cycles
     /// c: cpu core number
+    ///
     /// Read `/sys/devices/system/cpu/cpuX/cpufreq/scaling_cur_freq` to get the current frequency
+    ///
     /// ```ignore
     /// use std::time::{Duration, Instant};
     /// use cpu_cycles_reader::Cycles;
     ///
     /// let now = Instant::now();
-    /// let cycles_former = Cycles::from_ghz(1);
+    /// let cycles_former = Cycles::from_ghz(1); // Suppose it is 1ghz at this time
     ///
     /// // The cpu has performed some operations, assuming we are recording cpu7
     ///
     /// let dur = Instant::now() - now;
-    /// let cycles_later = Cycles::from_ghz(2);
+    /// let cycles_later = Cycles::from_ghz(2); // Suppose it is 2ghz at this time
     ///
     /// let cycles = cycles_later - cycles_former;
-    /// println!("{:.2}", cycles.as_usage(dur, 7).unwrap());
+    /// println!("{:.2}", cycles.as_usage(dur, 7).unwrap()); // Suppose you read cycles on cpu7
     /// ```
     pub fn as_usage(&self, d: Duration, c: u64) -> Result<f64, Box<dyn Error>> {
         let hz = (self.raw as u128 * 1_000_000)
@@ -40,24 +44,28 @@ impl Cycles {
     }
 
     /// Similar to as_usage, but returns the difference from the current frequency [`self::Cycles`]
+    ///
     /// For the same reason, diff may be negative
+    ///
     /// d: record the time of cycles
     /// c: cpu core number
-    /// 读取`/sys/devices/system/cpu/cpuX/cpufreq/scaling_cur_freq`来获取当前频率
+    ///
+    /// Read `/sys/devices/system/cpu/cpuX/cpufreq/scaling_cur_freq` to get the current frequency
+    ///
     /// ```ignore
     /// use std::time::{Duration, Instant};
     /// use cpu_cycles_reader::Cycles;
     ///
     /// let now = Instant::now();
-    /// let cycles_former = Cycles::from_ghz(1);
+    /// let cycles_former = Cycles::from_ghz(1); // Suppose it is 1ghz at this time
     ///
     /// // The cpu has performed some operations, assuming we are recording the cpu7
     ///
     /// let dur = Instant::now() - now;
-    /// let cycles_later = Cycles::from_ghz(2);
+    /// let cycles_later = Cycles::from_ghz(2); // Suppose it is 2ghz at this time
     ///
     /// let cycles = cycles_later - cycles_former;
-    /// println!("{}", cycles.as_diff(dur, 7).unwrap());
+    /// println!("{}", cycles.as_diff(dur, 7).unwrap()); // Suppose you read cycles on cpu7
     /// ```
     pub fn as_diff(&self, d: Duration, c: c_int) -> Option<Cycles> {
         let hz = Cycles::from_hz((self.raw * 1_000_000).checked_div(d.as_micros() as c_ll)?);

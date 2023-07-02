@@ -11,6 +11,7 @@ use libc::c_longlong as c_ll;
 pub use ext::*;
 pub use trans::*;
 
+/// Cycles provides a way to represent the number of cycles
 #[derive(
     Clone,
     Copy,

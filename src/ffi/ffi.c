@@ -39,6 +39,7 @@ struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus)
     if (reader->cpus == NULL)
     {
         free(reader);
+        reader = NULL;
         return NULL;
     }
     reader->size = numCpus;
@@ -54,6 +55,7 @@ struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus)
             }
             free(reader->cpus);
             free(reader);
+            reader = NULL;
             return NULL;
         }
         reader->cpus[i] = fd;
@@ -75,6 +77,8 @@ void destroyCyclesReader(struct CyclesReader *reader)
     }
     free(reader->cpus);
     free(reader);
+    
+    reader = NULL;
 }
 
 void enableCyclesReader(struct CyclesReader *reader)
