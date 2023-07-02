@@ -26,7 +26,7 @@ struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus)
         return NULL;
     }
 
-    // 配置 perf_event_attr 结构体
+    // Configure the perf_event_attr structure
     struct perf_event_attr pe;
     memset(&pe, 0, sizeof(struct perf_event_attr));
     pe.type = PERF_TYPE_HARDWARE;
@@ -34,7 +34,7 @@ struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus)
     pe.config = PERF_COUNT_HW_CPU_CYCLES;
     pe.disabled = 1;
 
-    // 创建perf events
+    // Create perf events
     reader->cpus = malloc(numCpus * sizeof(int));
     if (reader->cpus == NULL)
     {

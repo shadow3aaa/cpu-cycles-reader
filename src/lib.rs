@@ -1,5 +1,5 @@
-//! 这只为读取CpuCycles特化，不是对[perf_event_read](https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html)的完整封装
-//! ⚠ 权限要求: 确保程序拥有root权限
+//! Only for reading CpuCycles specialization, not a complete package of [perf_event_read](https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html)
+//! ⚠ Permission requirements: Make sure the program has root permissions
 //!
 //! Example:
 //! ```ignore
@@ -12,7 +12,7 @@
 //! let cycles_former = reader.read().unwrap();
 //! let cycles_former = cycles_former.get(&7).unwrap();
 //!
-//! // cpu进行了一些操作，我们记录的是cpu7
+//! // The cpu has performed some operations, we record cpu7
 //!
 //! let dur = Instant::now() - now;
 //! let cycles_later = reader.read().unwrap();
@@ -46,7 +46,7 @@ impl Drop for CyclesReader {
 }
 
 impl CyclesReader {
-    /// 创建CyclesReader
+    /// Create CyclesReader
     /// ```ignore
     /// use cpu_cycles_reader::CyclesReader;
     /// let reader = CyclesReader::new(&[0, 1, 2, 3]).unwrap();
@@ -62,7 +62,7 @@ impl CyclesReader {
         Ok(Self { raw_ptr, cpus })
     }
 
-    /// 开启Cycles监视
+    /// Enable Cycles monitoring
     /// ```ignore
     /// use cpu_cycles_reader::CyclesReader;
     ///
@@ -75,7 +75,7 @@ impl CyclesReader {
         }
     }
 
-    /// 关闭Cycles监视
+    /// Disable Cycles monitoring
     /// ```ignore
     /// use cpu_cycles_reader::CyclesReader;
     ///
@@ -88,9 +88,9 @@ impl CyclesReader {
         }
     }
 
-    /// 读取从开启到现在的Cycles数
-    /// 按照构造函数cpu参数顺序返回
-    pub fn read(&self) -> Result<HashMap<c_int, Cycles>, &'static str> {
+    /// Read the number of Cycles from start to present
+    /// Return in the order of the cpu parameters of the constructor
+    pub fn read(&self) ->Result<HashMap<c_int, Cycles>, &'static str> {
         let raw = unsafe { ffi::readCyclesReader(self.raw_ptr) };
 
         if raw.is_null() {
@@ -105,7 +105,7 @@ impl CyclesReader {
             .map(|(c, d)| (*c, Cycles::from(*d)))
             .collect(); // copied here
 
-        // 释放ffi malloc的数组
+        // Free the array of ffi malloc
         unsafe { libc::free(raw as *mut c_void) }
 
         Ok(map)

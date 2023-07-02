@@ -1,6 +1,6 @@
 [package]
 name = "cpu_cycles_reader"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 author = "shadow3"
 description = "为读取CpuCycles特化的perf_event_read封装"

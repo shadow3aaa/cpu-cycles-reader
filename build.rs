@@ -5,7 +5,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/ffi/ffi.c");
     let ffi_c_path = Path::new("src/ffi/ffi.c");
 
-    // 产生链接库
+    // generate link library
     let out_dir = env::var("OUT_DIR").unwrap();
     cc::Build::new().file(ffi_c_path).compile("ffi");
 
