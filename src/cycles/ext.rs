@@ -82,6 +82,6 @@ impl Cycles {
                 .checked_div(d.as_micros() as c_ll)
                 .ok_or("Failed to div")?,
         );
-        Ok((one_secs - f).min(Cycles::new(0)))
+        Ok(one_secs - f)
     }
 }
