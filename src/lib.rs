@@ -4,7 +4,7 @@
 //!
 //! Example:
 //! ```ignore
-//! use std::time::{Duration, Instant};
+//! use std::{fs, time::{Duration, Instant}};
 //! use cpu_cycles_reader::{Cycles, CyclesReader};
 //!
 //! let reader = CyclesReader::new(&[0, 1, 2, 3, 4, 5, 6, 7]).unwrap();
@@ -23,7 +23,12 @@
 //! let cycles = *cycles_later - *cycles_former; // Calculate difference
 //! // NOTE: There is no need to calculate the difference as a value within 1 second, there is such logic inside Cycles::as_usage() or Cycles::as_diff()
 //!
-//! let usage = cycles.as_usage(dur, 7).unwrap();
+//! let path = format!("/sys/devices/system/cpu/cpu{}/cpufreq/scaling_cur_freq", 7);
+//! let cur_freq = fs::read_to_string(&path).unwrap();
+//! let cur_freq = cur_freq.parse().unwrap();
+//! let freq_cycles = Cycles::from_khz(cur_freq);
+//!
+//! let usage = cycles.as_usage(dur, freq_cycles).unwrap();
 //! println!("{:.2}", usage);
 //! ```
 
