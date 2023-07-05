@@ -122,3 +122,5 @@ impl CyclesReader {
         Ok(map)
     }
 }
+
+unsafe impl Send for CyclesReader {}

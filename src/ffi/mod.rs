@@ -35,5 +35,5 @@ extern "C" {
 #[repr(C)]
 pub struct CyclesReaderRaw {
     pub size: size_t,
-    pub cpus: *mut c_int,
+    cpus: *mut c_int,
 }
