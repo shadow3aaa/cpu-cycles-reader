@@ -1,6 +1,6 @@
 //! Expansion of Cycles struct
 
-use std::time::Duration;
+use std::{error::Error, time::Duration};
 
 use libc::c_longlong as c_ll;
 
@@ -17,6 +17,8 @@ impl Cycles {
     ///
     /// Suggestion: Read `/sys/devices/system/cpu/cpuX/cpufreq/scaling_cur_freq` to get the current frequency
     ///
+    /// # Errors
+    /// Divide by zero or fail to trans u128 to i64
     /// ```ignore
     /// use std::{fs, time::{Duration, Instant}};
     /// use cpu_cycles_reader::Cycles;
@@ -37,15 +39,16 @@ impl Cycles {
     /// let cycles = cycles_later - cycles_former;
     /// println!("{:.2}", cycles.as_usage(dur, freq_cycles).unwrap()); // Suppose you read cycles on cpu7
     /// ```
-    pub fn as_usage(&self, d: Duration, f: Cycles) -> Result<f64, &str> {
-        let hz = (self.raw as u128 * 1_000_000)
-            .checked_div(d.as_micros())
+    #[allow(clippy::cast_precision_loss)]
+    pub fn as_usage(&self, d: Duration, f: Cycles) -> Result<f64, Box<dyn Error>> {
+        let hz = (self.raw * 1_000_000)
+            .checked_div(c_ll::try_from(d.as_micros())?)
             .ok_or("Failed to div")?;
         let cur_hz = f.as_hz();
         Ok(hz as f64 / cur_hz as f64)
     }
 
-    /// Similar to as_usage, but returns the difference from the current frequency [`Cycles`]
+    /// Similar to `as_usage`, but returns the difference from the current frequency [`Cycles`]
     ///
     /// For the same reason, diff may be negative
     ///
@@ -55,6 +58,8 @@ impl Cycles {
     ///
     /// Suggestion: Read `/sys/devices/system/cpu/cpuX/cpufreq/scaling_cur_freq` to get the current frequency
     ///
+    /// # Errors
+    /// Divide by zero
     /// ```ignore
     /// use std::{fs, time::{Duration, Instant}};
     /// use cpu_cycles_reader::Cycles;
@@ -76,10 +81,10 @@ impl Cycles {
     ///
     /// println!("{}", cycles.as_diff(dur, freq_cycles).unwrap());
     /// ```
-    pub fn as_diff(&self, d: Duration, f: Cycles) -> Result<Cycles, &str> {
+    pub fn as_diff(&self, d: Duration, f: Cycles) -> Result<Cycles, Box<dyn Error>> {
         let one_secs = Cycles::from_hz(
             (self.raw * 1_000_000)
-                .checked_div(d.as_micros() as c_ll)
+                .checked_div(c_ll::try_from(d.as_micros())?)
                 .ok_or("Failed to div")?,
         );
         Ok(f - one_secs)

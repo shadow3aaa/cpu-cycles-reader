@@ -33,6 +33,7 @@ pub struct Cycles {
     raw: c_ll,
 }
 
+#[allow(clippy::cast_precision_loss)]
 impl Display for Cycles {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         if self.raw >= 1_000_000_000 {

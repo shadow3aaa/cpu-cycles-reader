@@ -1,4 +1,4 @@
-//! Only for reading CpuCycles specialization, not a complete package of [perf_event_read](https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html)
+//! Only for reading `CpuCycles` specialization, not a complete package of [perf_event_read](https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html)
 //!
 //! ⚠ Permission requirements: Make sure the program has root permissions
 //!
@@ -32,13 +32,14 @@
 //! println!("{:.2}", usage);
 //! ```
 
+#![warn(clippy::all, clippy::pedantic)]
 mod cycles;
 pub mod ffi;
 
 use std::{collections::HashMap, ptr, slice};
 
 use ffi::CyclesReaderRaw;
-use libc::{c_int, c_void};
+use libc::c_int;
 
 pub use cycles::Cycles;
 
@@ -55,7 +56,10 @@ impl Drop for CyclesReader {
 }
 
 impl CyclesReader {
-    /// Create CyclesReader
+    /// Create `CyclesReader`
+    ///
+    /// # Errors
+    /// If there is an error when calling the syscall, it will return an error
     /// ```ignore
     /// use cpu_cycles_reader::CyclesReader;
     ///
@@ -101,6 +105,9 @@ impl CyclesReader {
     /// Read the number of Cycles from start to present
     ///
     /// According to the CPU number, it is collected as a [`std::collections::HashMap`], which is convenient for on-demand reading
+    ///
+    /// # Errors
+    /// If there is an error when calling the syscall, it will return an error
     pub fn read(&self) -> Result<HashMap<c_int, Cycles>, &'static str> {
         let raw = unsafe { ffi::readCyclesReader(self.raw_ptr) };
 
@@ -117,7 +124,7 @@ impl CyclesReader {
             .collect(); // copied here
 
         // Free the array of ffi malloc
-        unsafe { libc::free(raw as *mut c_void) }
+        unsafe { libc::free(raw.cast::<libc::c_void>()) }
 
         Ok(map)
     }
