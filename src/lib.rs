@@ -32,7 +32,8 @@
 //! println!("{:.2}", usage);
 //! ```
 
-#![warn(clippy::all, clippy::pedantic)]
+#![deny(clippy::all, clippy::pedantic)]
+#![warn(clippy::nursery, clippy::cargo)]
 mod cycles;
 pub mod ffi;
 

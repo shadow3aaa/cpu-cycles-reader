@@ -40,7 +40,7 @@ impl Cycles {
     /// println!("{:.2}", cycles.as_usage(dur, freq_cycles).unwrap()); // Suppose you read cycles on cpu7
     /// ```
     #[allow(clippy::cast_precision_loss)]
-    pub fn as_usage(&self, d: Duration, f: Cycles) -> Result<f64, Box<dyn Error>> {
+    pub fn as_usage(&self, d: Duration, f: Self) -> Result<f64, Box<dyn Error>> {
         let hz = (self.raw * 1_000_000)
             .checked_div(c_ll::try_from(d.as_micros())?)
             .ok_or("Failed to div")?;
@@ -81,8 +81,8 @@ impl Cycles {
     ///
     /// println!("{}", cycles.as_diff(dur, freq_cycles).unwrap());
     /// ```
-    pub fn as_diff(&self, d: Duration, f: Cycles) -> Result<Cycles, Box<dyn Error>> {
-        let one_secs = Cycles::from_hz(
+    pub fn as_diff(&self, d: Duration, f: Self) -> Result<Self, Box<dyn Error>> {
+        let one_secs = Self::from_hz(
             (self.raw * 1_000_000)
                 .checked_div(c_ll::try_from(d.as_micros())?)
                 .ok_or("Failed to div")?,
