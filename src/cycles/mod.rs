@@ -5,7 +5,10 @@ mod trans;
 
 use std::fmt::{self, Display, Formatter};
 
-use derive_more::{Add, Constructor, Div, From, Into, Mul, Sub, Sum};
+use derive_more::{
+    Add, AddAssign, Constructor, Div, DivAssign, From, Into, Mul, MulAssign, Neg, Rem, RemAssign,
+    Sub, SubAssign, Sum,
+};
 use libc::c_longlong as c_ll;
 
 pub use ext::*;
@@ -28,6 +31,13 @@ pub use trans::*;
     PartialOrd,
     Eq,
     Ord,
+    Neg,
+    Rem,
+    SubAssign,
+    AddAssign,
+    RemAssign,
+    DivAssign,
+    MulAssign,
 )]
 pub struct Cycles {
     raw: c_ll,
