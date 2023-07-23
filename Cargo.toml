@@ -1,6 +1,6 @@
 [package]
 name = "cpu_cycles_reader"
-version = "0.1.40"
+version = "0.1.41"
 edition = "2021"
 description = "perf_event_read package specialized for reading cpu cycles"
 repository = "https://github.com/shadow3aaa/cpu-cycles-reader"
