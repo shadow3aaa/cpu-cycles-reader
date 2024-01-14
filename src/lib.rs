@@ -44,6 +44,7 @@ use libc::c_int;
 
 pub use cycles::Cycles;
 
+#[derive(Debug)]
 pub struct CyclesReader {
     raw_ptr: *mut CyclesReaderRaw,
     cpus: Vec<c_int>,
