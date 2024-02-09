@@ -101,20 +101,11 @@ void disableCyclesReader(struct CyclesReader *reader)
         ioctl(reader->cpus[i], PERF_EVENT_IOC_DISABLE, 0);
 }
 
-long long *readCyclesReader(struct CyclesReader *reader)
+long long readCyclesReader(struct CyclesReader *reader, int Cpu)
 {
-    long long *count = malloc(reader->size * sizeof(long long));
-
-    for (size_t i = 0; i < reader->size; i++)
-    {
-        ssize_t result = read(reader->cpus[i], &count[i], sizeof(long long));
-        if (result == -1)
-        {
-            perror("read");
-            free(count);
-            return NULL;
-        }
-    }
-
-    return count;
+    long long cycles = 0;
+    if (read(reader->cpus[Cpu], &cycles, sizeof(long long)) == -1)
+        return -1;
+    else
+        return cycles;
 }

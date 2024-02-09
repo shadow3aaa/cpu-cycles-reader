@@ -1,6 +1,5 @@
 //! Cycles provides a way to represent the number of cycles
 
-mod ext;
 mod trans;
 
 use std::fmt::{self, Display, Formatter};
@@ -53,4 +52,9 @@ impl Display for Cycles {
             write!(f, "{}Hz", self.raw)
         }
     }
+}
+
+impl Cycles {
+    pub const MAX: Self = Self { raw: c_ll::MAX };
+    pub const ZERO: Self = Self { raw: 0 };
 }

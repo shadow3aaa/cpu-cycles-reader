@@ -28,7 +28,7 @@ extern "C" {
     /// The returned array pointer is also allocated by malloc, consider calling [`libc::free`] to release to ensure memory safety, and remember to prevent dangling pointers
     ///
     /// NOTE: The length of the array is the number of CPUs used during construction. Consider using the `size` member of [`self::CyclesReaderRaw`] to determine the length of the array
-    pub fn readCyclesReader(reader: *mut CyclesReaderRaw) -> *mut c_ll;
+    pub fn readCyclesReader(reader: *mut CyclesReaderRaw, cpu: c_int) -> c_ll;
 }
 
 /// The Raw Reader Structure, corresponding to the same structure in C

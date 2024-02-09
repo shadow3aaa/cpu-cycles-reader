@@ -1,14 +1,11 @@
-//! Only for reading `CpuCycles` specialization, not a complete package of [perf_event_read](https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html)
-//!
-//! ⚠ Permission requirements: Make sure the program has root permissions
+//! This is only for reading `CpuCycles` specialization, not a complete package of [perf_event_read](https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html)
 //!
 //! Example:
-//! ```ignore
+//! ```
 //! use std::{fs, time::{Duration, Instant}};
-//! use cpu_cycles_reader::{Cycles, CyclesReader};
+//! use cpu_cycles_reader::{Cycles, CyclesReader, CyclesInstant};
 //!
-//! let reader = CyclesReader::new(&[0, 1, 2, 3, 4, 5, 6, 7]).unwrap();
-//! reader.enable();
+//! let reader = CyclesReader::new().unwrap();
 //!
 //! let now = Instant::now();
 //! let cycles_former = reader.read().unwrap();
@@ -31,105 +28,73 @@
 //! let usage = cycles.as_usage(dur, freq_cycles).unwrap();
 //! println!("{:.2}", usage);
 //! ```
-
 #![deny(clippy::all, clippy::pedantic)]
 #![warn(clippy::nursery, clippy::cargo)]
+#![allow(clippy::missing_panics_doc, clippy::module_name_repetitions)]
+#![cfg(any(target_os = "linux", target_os = "android"))]
 mod cycles;
+mod error;
 pub mod ffi;
+mod instant;
 
-use std::{collections::HashMap, ptr, slice};
+use std::ptr;
 
 use ffi::CyclesReaderRaw;
 use libc::c_int;
 
 pub use cycles::Cycles;
+pub use error::{Error, Result};
+pub use instant::CyclesInstant;
 
 #[derive(Debug)]
 pub struct CyclesReader {
     raw_ptr: *mut CyclesReaderRaw,
-    cpus: Vec<c_int>,
 }
 
 impl Drop for CyclesReader {
     fn drop(&mut self) {
-        unsafe { ffi::destroyCyclesReader(self.raw_ptr) } // ffi里面已经free，不需要rust调用free
+        unsafe {
+            ffi::disableCyclesReader(self.raw_ptr);
+            ffi::destroyCyclesReader(self.raw_ptr);
+        }
         self.raw_ptr = ptr::null_mut();
     }
 }
 
 impl CyclesReader {
-    /// Create `CyclesReader`
-    ///
     /// # Errors
-    /// If there is an error when calling the syscall, it will return an error
-    /// ```ignore
-    /// use cpu_cycles_reader::CyclesReader;
     ///
-    /// let reader = CyclesReader::new(&[0, 1, 2, 3]).unwrap();
-    /// ```
-    pub fn new(cpus: &[c_int]) -> Result<Self, &'static str> {
-        let cpus = cpus.to_vec();
+    /// If there is an error when calling the syscall, it will return an error
+    pub fn new() -> Result<Self> {
+        let cpus = c_int::try_from(num_cpus::get_physical())?;
+        let cpus: Vec<_> = (0..cpus).collect();
         let cpus_ptr = cpus.as_ptr();
 
-        let raw_ptr = unsafe { ffi::createCyclesReader(cpus_ptr, cpus.len()) };
+        let raw_ptr = unsafe {
+            let ptr = ffi::createCyclesReader(cpus_ptr, cpus.len());
+            ffi::enableCyclesReader(ptr);
+            ptr
+        };
+
         if raw_ptr.is_null() {
-            return Err("Failed to create CyclesReader");
+            return Err(Error::FailedToCreate);
         }
-        Ok(Self { raw_ptr, cpus })
+
+        Ok(Self { raw_ptr })
     }
 
-    /// Enable Cycles monitoring
-    /// ```ignore
-    /// use cpu_cycles_reader::CyclesReader;
-    ///
-    /// let reader = CyclesReader::new(&[0, 1, 2, 3]).unwrap();
-    /// reader.enable();
-    /// ```
-    pub fn enable(&self) {
-        unsafe {
-            ffi::enableCyclesReader(self.raw_ptr);
-        }
-    }
-
-    /// Disable Cycles monitoring
-    /// ```ignore
-    /// use cpu_cycles_reader::CyclesReader;
-    ///
-    /// let reader = CyclesReader::new(&[0, 1, 2, 3]).unwrap();
-    /// reader.disable();
-    /// ```
-    pub fn disable(&self) {
-        unsafe {
-            ffi::disableCyclesReader(self.raw_ptr);
-        }
-    }
-
-    /// Read the number of Cycles from start to present
-    ///
-    /// According to the CPU number, it is collected as a [`std::collections::HashMap`], which is convenient for on-demand reading
-    ///
     /// # Errors
+    ///
     /// If there is an error when calling the syscall, it will return an error
-    pub fn read(&self) -> Result<HashMap<c_int, Cycles>, &'static str> {
-        let raw = unsafe { ffi::readCyclesReader(self.raw_ptr) };
+    pub fn instant(&mut self, cpu: c_int) -> Result<CyclesInstant> {
+        let raw = unsafe { ffi::readCyclesReader(self.raw_ptr, cpu) };
 
-        if raw.is_null() {
-            return Err("CyclesReader failed to read");
+        if raw == -1 {
+            Err(Error::FailedToRead)
+        } else {
+            let cycles = Cycles::new(raw);
+            let instant = CyclesInstant::new(cpu, cycles);
+            Ok(instant)
         }
-
-        let slice = unsafe { slice::from_raw_parts(raw, (*self.raw_ptr).size) };
-        let map = self
-            .cpus
-            .iter()
-            .zip(slice)
-            .map(|(c, d)| (*c, Cycles::from(*d)))
-            .collect(); // copied here
-
-        // Free the array of ffi malloc
-        unsafe { libc::free(raw.cast::<libc::c_void>()) }
-
-        Ok(map)
     }
 }
-
-unsafe impl Send for CyclesReader {}
