@@ -1,32 +1,19 @@
 //! This is only for reading `CpuCycles` specialization, not a complete package of [perf_event_read](https://www.man7.org/linux/man-pages/man2/perf_event_open.2.html)
 //!
 //! Example:
-//! ```
-//! use std::{fs, time::{Duration, Instant}};
+//! ```ignore
+//! use std::{fs, time::{Duration, Instant}, thread};
 //! use cpu_cycles_reader::{Cycles, CyclesReader, CyclesInstant};
 //!
 //! let reader = CyclesReader::new().unwrap();
+//! let record_1 = reader.instant(0).unwrap();
 //!
-//! let now = Instant::now();
-//! let cycles_former = reader.read().unwrap();
-//! let cycles_former = cycles_former.get(&7).unwrap(); // get cycles
+//! thread::sleep(Duration::from_secs(1));
 //!
-//! // The cpu has performed some operations, here we record cpu7
+//! let record_2 = reader.instant(0).unwrap();
+//! let cycles = record_2 - record_1;
 //!
-//! let dur = Instant::now() - now;
-//! let cycles_later = reader.read().unwrap();
-//! let cycles_later = cycles_later.get(&7).unwrap(); // get cycles
-//!
-//! let cycles = *cycles_later - *cycles_former; // Calculate difference
-//! // NOTE: There is no need to calculate the difference as a value within 1 second, there is such logic inside Cycles::as_usage() or Cycles::as_diff()
-//!
-//! let path = format!("/sys/devices/system/cpu/cpu{}/cpufreq/scaling_cur_freq", 7);
-//! let cur_freq = fs::read_to_string(&path).unwrap();
-//! let cur_freq = cur_freq.parse().unwrap();
-//! let freq_cycles = Cycles::from_khz(cur_freq);
-//!
-//! let usage = cycles.as_usage(dur, freq_cycles).unwrap();
-//! println!("{:.2}", usage);
+//! println!("{cycles}");
 //! ```
 #![deny(clippy::all, clippy::pedantic)]
 #![warn(clippy::nursery, clippy::cargo)]
@@ -86,7 +73,7 @@ impl CyclesReader {
     /// # Errors
     ///
     /// If there is an error when calling the syscall, it will return an error
-    pub fn instant(&mut self, cpu: c_int) -> Result<CyclesInstant> {
+    pub fn instant(&self, cpu: c_int) -> Result<CyclesInstant> {
         let raw = unsafe { ffi::readCyclesReader(self.raw_ptr, cpu) };
 
         if raw == -1 {

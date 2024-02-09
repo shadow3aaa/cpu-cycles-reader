@@ -10,7 +10,7 @@ use derive_more::{
 };
 use libc::c_longlong as c_ll;
 
-/// Cycles provides a way to represent the number of cycles
+/// Represent the number of cpu cycles
 #[derive(
     Clone,
     Copy,
