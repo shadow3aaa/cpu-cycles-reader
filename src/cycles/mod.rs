@@ -57,4 +57,24 @@ impl Display for Cycles {
 impl Cycles {
     pub const MAX: Self = Self { raw: c_ll::MAX };
     pub const ZERO: Self = Self { raw: 0 };
+
+    #[must_use]
+    pub fn mul_f64(&self, rhs: f64) -> Self {
+        Self::new((self.raw as f64 * rhs) as i64)
+    }
+
+    #[must_use]
+    pub fn div_f64(&self, rhs: f64) -> Self {
+        Self::new((self.raw as f64 / rhs) as i64)
+    }
+
+    #[must_use]
+    pub fn mul_f32(&self, rhs: f32) -> Self {
+        Self::new((self.raw as f32 * rhs) as i64)
+    }
+
+    #[must_use]
+    pub fn div_f32(&self, rhs: f32) -> Self {
+        Self::new((self.raw as f32 / rhs) as i64)
+    }
 }
