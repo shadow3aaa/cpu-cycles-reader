@@ -5,6 +5,8 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
+#include <sys/types.h>
 
 static int perf_event_open(struct perf_event_attr *hw_event, pid_t pid, int cpu, int group_fd, unsigned long flags)
 {
@@ -19,7 +21,7 @@ struct CyclesReader
     int *cpus; // fd
 };
 
-struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus)
+struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus, pid_t pid)
 {
     struct CyclesReader *reader = malloc(sizeof(struct CyclesReader));
     if (reader == NULL)
@@ -47,7 +49,7 @@ struct CyclesReader *createCyclesReader(const int *Cpus, size_t numCpus)
 
     for (size_t i = 0; i < numCpus; i++)
     {
-        int fd = perf_event_open(&pe, -1, Cpus[i], -1, 0);
+        int fd = perf_event_open(&pe, pid, Cpus[i], -1, 0);
         if (fd == -1)
         {
             for (size_t j = 0; j < i; j++)

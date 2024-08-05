@@ -27,7 +27,7 @@ mod instant;
 use std::ptr;
 
 use ffi::CyclesReaderRaw;
-use libc::c_int;
+use libc::{c_int, pid_t};
 
 pub use cycles::Cycles;
 pub use error::{Error, Result};
@@ -52,13 +52,13 @@ impl CyclesReader {
     /// # Errors
     ///
     /// If there is an error when calling the syscall, it will return an error
-    pub fn new() -> Result<Self> {
+    pub fn new(pid: Option<pid_t>) -> Result<Self> {
         let cpus = c_int::try_from(num_cpus::get_physical())?;
         let cpus: Vec<_> = (0..cpus).collect();
         let cpus_ptr = cpus.as_ptr();
 
         let raw_ptr = unsafe {
-            let ptr = ffi::createCyclesReader(cpus_ptr, cpus.len());
+            let ptr = ffi::createCyclesReader(cpus_ptr, cpus.len(), pid.unwrap_or(-1));
             ffi::enableCyclesReader(ptr);
             ptr
         };

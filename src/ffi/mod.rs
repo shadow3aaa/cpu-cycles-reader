@@ -2,7 +2,7 @@
 //!
 //! Unless you are really sure you have to use them, just use [`crate::CyclesReader`] for normal purpose
 
-use libc::{c_int, c_longlong as c_ll, size_t};
+use libc::{c_int, c_longlong as c_ll, pid_t, size_t};
 
 extern "C" {
     /// Mock constructor
@@ -10,7 +10,7 @@ extern "C" {
     /// This C function internally calls malloc to allocate a memory to construct CyclesReaderRaw, and returns a pointer to the heap
     ///
     /// If there is an error in the creation process, the memory will be free, and the pointer will be set to NULL to return, special attention should be paid
-    pub fn createCyclesReader(cpus: *const c_int, num_cpus: size_t) -> *mut CyclesReaderRaw;
+    pub fn createCyclesReader(cpus: *const c_int, num_cpus: size_t, pid: pid_t) -> *mut CyclesReaderRaw;
 
     /// Mock destructor
     ///
