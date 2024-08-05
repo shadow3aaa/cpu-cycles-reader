@@ -54,6 +54,12 @@ impl Display for Cycles {
     }
 }
 
+impl Default for Cycles {
+    fn default() -> Self {
+        Self::ZERO
+    }
+}
+
 impl Cycles {
     pub const MAX: Self = Self { raw: c_ll::MAX };
     pub const ZERO: Self = Self { raw: 0 };
