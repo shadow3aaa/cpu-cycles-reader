@@ -49,6 +49,8 @@ impl Drop for CyclesReader {
 }
 
 impl CyclesReader {
+    /// pid: This measures the specified process/thread on any CPU. Set to `None` if measures all processes/threads on any cpu is wanted.
+    ///
     /// # Errors
     ///
     /// If there is an error when calling the syscall, it will return an error
